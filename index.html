@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caught in the Net</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#2D3B3A;--fg:#F5EFE6;
+  --salmon:#E8A898;--teal:#2A5C62;--teal-mid:#3A7279;
+  --g050:#F0EAE0;--g100:#E0D9CE;--g300:#C0B8AC;--g500:#8A9490;--g700:#4A5856;
+  --red:#E24B4A;--green:#2A8C6E;--amber:#D4894A;
+  --card-bg:rgba(255,255,255,.05);--card-border:rgba(255,255,255,.1);
+}
+html,body{height:100%}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
+
+/* PROGRESS */
+.prog{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08);z-index:200}
+.prog-fill{height:100%;background:var(--salmon);transition:width .5s ease}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* TOPBAR */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;border-bottom:.5px solid rgba(255,255,255,.08);flex-shrink:0}
+.topbar-logo{font-size:13px;font-weight:500;color:var(--salmon);letter-spacing:.02em}
+.topbar-step{font-size:11px;color:var(--g500)}
+
+/* CONTENT */
+.content{flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 32px;max-width:720px;margin:0 auto;width:100%}
+.eyebrow{font-size:11px;color:var(--salmon);letter-spacing:.1em;text-transform:uppercase;font-weight:500;margin-bottom:16px}
+h1{font-size:34px;font-weight:300;line-height:1.15;margin-bottom:16px}
+h1 strong{font-weight:500}
+.sub{font-size:15px;color:var(--g500);line-height:1.75;max-width:520px;margin-bottom:32px}
+.sub strong{color:var(--fg)}
+
+/* LANDING SCREEN */
+.landing-fact{background:rgba(232,168,152,.06);border-left:3px solid var(--salmon);border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:32px;max-width:500px}
+.landing-fact p{font-size:14px;color:var(--fg);line-height:1.75}
+.landing-fact p + p{margin-top:8px;color:var(--g500);font-size:13px}
+
+/* INTRO CARD */
+.intro-card{background:var(--card-bg);border:.5px solid var(--card-border);border-radius:12px;padding:28px;margin-bottom:28px}
+.intro-step{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px}
+.intro-step:last-child{margin-bottom:0}
+.intro-num{width:28px;height:28px;border-radius:50%;background:rgba(232,168,152,.12);border:.5px solid rgba(232,168,152,.3);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--salmon);flex-shrink:0;font-weight:500}
+.intro-step-text{font-size:14px;color:var(--fg);line-height:1.65;padding-top:3px}
+.intro-step-text span{color:var(--g500);font-size:13px;display:block;margin-top:3px}
+
+/* TRAINING CARD */
+.training-card{background:var(--card-bg);border:.5px solid var(--card-border);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.training-header{background:rgba(255,255,255,.04);padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:.5px solid rgba(255,255,255,.07)}
+.training-logo{width:30px;height:30px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--fg);flex-shrink:0}
+.training-title{font-size:13px;font-weight:500}
+.training-sub{font-size:11px;color:var(--g500)}
+.progress-steps{display:flex;gap:5px;padding:14px 20px 0}
+.ps{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.1)}
+.ps.done{background:var(--salmon)}
+.ps.active{background:var(--salmon);opacity:.5}
+.training-msg{padding:16px 20px 20px;font-size:13px;color:var(--g500);line-height:1.65}
+.training-msg strong{color:var(--fg)}
+
+/* SELECT */
+select{width:100%;background:rgba(255,255,255,.05);border:.5px solid rgba(255,255,255,.18);border-radius:8px;padding:12px 16px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--fg);outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A9490' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;margin-bottom:20px}
+select option{background:#2D3B3A}
+select optgroup{background:#222E2D;color:var(--salmon);font-size:11px}
+
+/* PLEDGE */
+.pledge-wrap{background:var(--card-bg);border:.5px solid var(--card-border);border-radius:10px;overflow:hidden;margin-top:4px}
+.pledge-header{background:rgba(255,255,255,.04);padding:10px 16px;border-bottom:.5px solid rgba(255,255,255,.07)}
+.pledge-header-text{font-size:12px;color:var(--g500)}
+.pledge-header-text span{color:var(--salmon)}
+.pledge-fields{padding:16px}
+.pledge-field{margin-bottom:14px}
+.pledge-label{font-size:11px;font-weight:600;color:var(--salmon);letter-spacing:.04em;margin-bottom:6px;display:block;line-height:1.4}
+.pledge-input{width:100%;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.1);border-radius:7px;padding:11px 13px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--fg);outline:none;line-height:1.6;resize:none;min-height:44px}
+.pledge-input::placeholder{color:var(--g700)}
+.pledge-input:focus{border-color:rgba(232,168,152,.35)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:8px;font-size:14px;font-weight:500;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--salmon);color:var(--teal)}
+.btn-primary:hover{background:#ebb5a6}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--g500);border:.5px solid rgba(255,255,255,.12)}
+.btn-ghost:hover{color:var(--fg);border-color:rgba(255,255,255,.3)}
+.btn-row{display:flex;gap:12px;align-items:center;margin-top:24px;flex-wrap:wrap}
+.err{font-size:12px;color:#E06C6C;margin-top:8px;display:none}
+.err.show{display:block}
+
+/* SAVED */
+.check-icon{width:52px;height:52px;border-radius:50%;background:rgba(42,140,110,.12);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:24px}
+
+/* TRIGGER SCREEN */
+#s-trigger{background:var(--salmon)}
+#s-trigger .topbar{background:var(--salmon);border-bottom:.5px solid rgba(0,0,0,.08)}
+#s-trigger .topbar-logo{color:var(--teal)}
+#s-trigger .topbar-step{color:rgba(45,59,58,.5)}
+#s-trigger h1{color:var(--teal)}
+#s-trigger .sub{color:rgba(45,59,58,.55)}
+#s-trigger .eyebrow{color:rgba(45,59,58,.4)}
+.trigger-card{background:var(--teal);border-radius:12px;padding:24px;margin-bottom:20px}
+.trigger-from{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:.5px solid rgba(255,255,255,.12)}
+.trigger-avatar{width:34px;height:34px;border-radius:50%;background:var(--teal-mid);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--fg);flex-shrink:0}
+.trigger-name{font-size:13px;font-weight:500;color:var(--fg)}
+.trigger-role{font-size:11px;color:var(--g500)}
+.manager-note{background:rgba(232,168,152,.08);border:.5px solid rgba(232,168,152,.2);border-radius:8px;padding:12px 14px;margin:12px 0;font-size:13px;color:var(--fg);line-height:1.65;font-style:italic}
+.incident-block{background:rgba(232,168,152,.07);border-left:3px solid rgba(232,168,152,.5);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0}
+.incident-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--salmon);font-weight:500;margin-bottom:6px}
+.incident-text{font-size:14px;color:var(--fg);line-height:1.7}
+.stat-pill{display:inline-block;background:rgba(232,168,152,.1);border:.5px solid rgba(232,168,152,.25);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--salmon);margin-top:10px}
+.choices{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.choice{display:flex;align-items:center;gap:10px;padding:12px 16px;border:.5px solid rgba(0,0,0,.18);border-radius:8px;background:rgba(0,0,0,.1);cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:var(--teal);text-align:left;transition:all .15s}
+.choice:hover{background:rgba(0,0,0,.18)}
+.choice.sel{background:rgba(0,0,0,.2);border-color:rgba(0,0,0,.3)}
+.choice-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;position:relative}
+.choice.sel .choice-dot{background:var(--teal);border-color:var(--teal)}
+.choice.sel .choice-dot::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:5px;height:5px;background:var(--salmon);border-radius:50%}
+#s-trigger .err{color:rgba(45,59,58,.5)}
+#s-trigger .btn-primary{background:var(--teal);color:var(--salmon)}
+#s-trigger .btn-primary:hover{background:#255258}
+
+/* INBOX / TEAMS SHELL */
+.teams-shell{display:flex;height:100vh}
+.teams-sidebar{width:64px;background:#1E2C2C;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:8px;border-right:.5px solid rgba(255,255,255,.06)}
+.teams-icon{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--g500)}
+.teams-icon.active{background:var(--teal);color:var(--fg)}
+.teams-icon.avatar{background:var(--teal-mid);color:var(--fg);font-size:12px;font-weight:500;margin-top:auto}
+.teams-main{flex:1;display:flex;flex-direction:column;background:#283635}
+.teams-header{padding:12px 20px;border-bottom:.5px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:12px}
+.teams-header-title{font-size:14px;font-weight:500;color:var(--fg)}
+.teams-header-sub{font-size:11px;color:var(--g500)}
+.inbox-list{flex:1;overflow-y:auto}
+.inbox-row{display:flex;align-items:flex-start;gap:12px;padding:12px 20px;cursor:pointer;border-bottom:.5px solid rgba(255,255,255,.04);transition:background .1s}
+.inbox-row:hover{background:rgba(255,255,255,.04)}
+.inbox-row.unread{background:rgba(42,92,98,.18)}
+.inbox-avatar{width:36px;height:36px;border-radius:50%;background:var(--teal-mid);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--fg);flex-shrink:0}
+.inbox-info{flex:1;min-width:0}
+.inbox-name{font-size:13px;font-weight:500;color:var(--fg);margin-bottom:2px}
+.inbox-preview{font-size:12px;color:var(--g500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inbox-time{font-size:11px;color:var(--g500);flex-shrink:0}
+.unread-dot{width:8px;height:8px;border-radius:50%;background:var(--salmon);flex-shrink:0;margin-top:6px}
+
+/* LETTER PANEL */
+.email-panel{position:fixed;inset:0;background:#283635;z-index:300;display:flex;flex-direction:column;padding:32px 40px;overflow-y:auto}
+.email-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--g500);cursor:pointer;margin-bottom:24px}
+.email-back:hover{color:var(--fg)}
+.email-from-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.email-sender-avatar{width:40px;height:40px;border-radius:50%;background:var(--salmon);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--teal);flex-shrink:0}
+.email-sender-name{font-size:14px;font-weight:500;color:var(--fg)}
+.email-sender-time{font-size:12px;color:var(--g500)}
+.email-subject{font-size:20px;font-weight:500;color:var(--fg);margin-bottom:20px;padding-bottom:16px;border-bottom:.5px solid rgba(255,255,255,.08)}
+.email-body{font-size:14px;color:var(--g500);line-height:1.8;max-width:600px}
+.commitment-block{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--salmon);background:rgba(232,168,152,.06);border:.5px solid rgba(232,168,152,.18);border-radius:6px;padding:14px 16px;margin:16px 0;line-height:1.65;white-space:pre-wrap}
+
+/* ACTION CARDS */
+.action-cards{margin-top:24px;display:flex;flex-direction:column;gap:10px;max-width:520px}
+.action-card{display:flex;gap:14px;padding:16px;border:.5px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.03)}
+.action-card-num{width:28px;height:28px;border-radius:50%;background:rgba(232,168,152,.12);border:.5px solid rgba(232,168,152,.3);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--salmon);flex-shrink:0;font-weight:500;margin-top:1px}
+.action-card-text{flex:1}
+.action-card-title{font-size:14px;font-weight:500;color:var(--fg);margin-bottom:3px}
+.action-card-desc{font-size:12px;color:var(--g500);line-height:1.6}
+
+/* LEADERBOARD */
+.lb-wrap{padding:40px 32px;max-width:680px;margin:0 auto;width:100%}
+.lb-intro{background:rgba(232,168,152,.06);border:.5px solid rgba(232,168,152,.15);border-radius:10px;padding:20px;margin-bottom:28px}
+.lb-intro-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--salmon);font-weight:500;margin-bottom:8px}
+.lb-intro-text{font-size:14px;color:var(--fg);line-height:1.7}
+.lb-intro-text span{color:var(--g500)}
+.lb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+.lb-stat{background:var(--card-bg);border:.5px solid var(--card-border);border-radius:10px;padding:16px;text-align:center}
+.lb-stat-num{font-size:28px;font-weight:300;line-height:1;margin-bottom:4px}
+.lb-stat-lbl{font-size:11px;color:var(--g500)}
+.lb-team-row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:.5px solid rgba(255,255,255,.05)}
+.lb-rank{font-size:12px;color:var(--g500);width:22px;text-align:center;flex-shrink:0}
+.lb-rank.gold{color:#E8C85A}
+.lb-rank.silver{color:#B0B8C0}
+.lb-rank.bronze{color:#C4906A}
+.lb-team-icon{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--fg);flex-shrink:0}
+.lb-team-info{flex:1;min-width:0}
+.lb-team-name{font-size:13px;color:var(--fg);font-weight:500}
+.lb-team-sub{font-size:11px;color:var(--g500);margin-top:1px}
+.your-tag{font-size:10px;color:var(--salmon);background:rgba(232,168,152,.12);padding:2px 7px;border-radius:3px;margin-left:7px}
+.lb-score{font-size:14px;font-weight:500;color:var(--fg)}
+.lb-bar-wrap{width:72px;background:rgba(255,255,255,.07);border-radius:3px;height:4px;overflow:hidden;margin-left:8px;flex-shrink:0}
+.lb-bar{height:100%;background:var(--salmon);border-radius:3px}
+.lb-team-row.you .lb-team-icon{background:rgba(232,168,152,.12);color:var(--salmon)}
+.lb-team-row.you .lb-team-name{color:var(--salmon)}
+.reward-banner{background:rgba(42,92,98,.25);border:.5px solid rgba(42,92,98,.5);border-radius:10px;padding:18px 20px;margin-top:24px;display:flex;gap:14px;align-items:flex-start}
+.reward-icon{font-size:24px;flex-shrink:0}
+.reward-text{font-size:13px;color:var(--fg);line-height:1.65}
+.reward-text strong{color:var(--salmon)}
+
+/* END */
+.end-shell{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 32px}
+.end-star{width:60px;height:60px;border-radius:50%;background:rgba(232,168,152,.1);border:1.5px solid var(--salmon);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:28px}
+.end-title{font-size:28px;font-weight:300;line-height:1.25;margin-bottom:14px}
+.end-sub{font-size:14px;color:var(--g500);line-height:1.75;max-width:400px;margin-bottom:40px}
+.end-credit{font-size:11px;color:var(--g700);margin-top:40px;line-height:1.9}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:36px}
+.tag{background:rgba(232,168,152,.08);border:.5px solid rgba(232,168,152,.2);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--salmon)}
+
+@media(max-width:600px){
+  .topbar{padding:14px 20px}
+  .content{padding:32px 20px}
+  h1{font-size:26px}
+  .lb-wrap{padding:28px 20px}
+  .lb-stats{grid-template-columns:repeat(3,1fr);gap:6px}
+  .lb-bar-wrap{display:none}
+  .email-panel{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+<div class="prog"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+
+<!-- ══════════════════════════════════════════
+     S0 · LANDING
+════════════════════════════════════════════ -->
+<div class="screen active" id="s0">
+  <div class="topbar">
+    <span class="topbar-logo">Caught in the Net</span>
+    <span class="topbar-step">A behaviour change prototype</span>
+  </div>
+  <div class="content">
+    <div class="eyebrow">You took the bait</div>
+    <h1><strong>You just got phished!</strong></h1>
+    <div class="landing-fact">
+      <p>Most organisations run an annual cybersecurity training. A short video. A quiz. A certificate. It ends there.</p>
+      <p>No follow-up. No reminder. Nothing. So when a phishing email lands a month later, the training is long forgotten.</p>
+    </div>
+    <p class="sub">This prototype explores what happens when <strong>security doesn't stop at the training.</strong> Takes about 3 minutes.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('s1')">Try the prototype</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S1 · HOW IT WORKS
+════════════════════════════════════════════ -->
+<div class="screen" id="s1">
+  <div class="topbar">
+    <span class="topbar-logo">Caught in the Net</span>
+    <span class="topbar-step">How it works</span>
+  </div>
+  <div class="content">
+    <div class="eyebrow">The system</div>
+    <h1>Four moments.<br><strong>One habit.</strong></h1>
+    <div class="intro-card">
+      <div class="intro-step">
+        <div class="intro-num">1</div>
+        <div class="intro-step-text">1. The Pledge<span>A personal commitment written by you, sent back to you.</span></div>
+      </div>
+      <div class="intro-step">
+        <div class="intro-num">2</div>
+        <div class="intro-step-text">2. The Trigger<span>Your manager shares a real incident the next morning.</span></div>
+      </div>
+      <div class="intro-step">
+        <div class="intro-num">3</div>
+        <div class="intro-step-text">3. The Return<span>Your pledge comes back 30 days later. Did you act on it?</span></div>
+      </div>
+      <div class="intro-step">
+        <div class="intro-num">4</div>
+        <div class="intro-step-text">4. The Leaderboard<span>See how your team is doing. Something to compete on together.</span></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goTo('s2')">Start</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S2 · TRAINING COMPLETE + TEAM + PLEDGE
+════════════════════════════════════════════ -->
+<div class="screen" id="s2">
+  <div class="topbar">
+    <span class="topbar-logo">Caught in the Net</span>
+    <span class="topbar-step">1. The Pledge</span>
+  </div>
+  <div class="content">
+    <div class="training-card">
+      <div class="training-header">
+        <div class="training-logo">CS</div>
+        <div>
+          <div class="training-title">Annual Cybersecurity Training</div>
+          <div class="training-sub">Mandatory module · All staff</div>
+        </div>
+      </div>
+      <div class="progress-steps">
+        <div class="ps done"></div><div class="ps done"></div><div class="ps done"></div>
+        <div class="ps done"></div><div class="ps done"></div><div class="ps active"></div>
+      </div>
+      <div class="training-msg"><strong>Training complete.</strong> One last thing before you close this tab.</div>
+    </div>
+
+    <p style="font-size:13px;color:var(--g500);margin-bottom:14px;line-height:1.65">Select your team, then answer four prompts. <strong style="color:var(--fg)">No right answers.</strong></p>
+
+    <select id="teamSelect" onchange="onTeamSelect()">
+      <option value="">Select your team</option>
+      <optgroup label="Corporate">
+        <option value="finance">Finance</option>
+        <option value="hr">People and HR</option>
+        <option value="legal">Legal and Compliance</option>
+        <option value="comms">Communications</option>
+        <option value="marketing">Marketing</option>
+      </optgroup>
+      <optgroup label="Technology">
+        <option value="tech">Technology and Engineering</option>
+        <option value="it">IT and Cloud</option>
+        <option value="data">Data and AI</option>
+        <option value="software">Software Development</option>
+      </optgroup>
+      <optgroup label="Business">
+        <option value="sales">Sales</option>
+        <option value="ops">Operations</option>
+        <option value="strategy">Strategy</option>
+        <option value="cx">Customer Experience</option>
+      </optgroup>
+      <optgroup label="Other">
+        <option value="other">Other / Not listed</option>
+      </optgroup>
+    </select>
+
+    <div id="pledgeWrap" style="display:none">
+      <div class="pledge-wrap">
+        <div class="pledge-header">
+          <div class="pledge-header-text">Your pledge · <span>sent to yourself</span></div>
+        </div>
+        <div class="pledge-fields">
+          <div class="pledge-field">
+            <label class="pledge-label">Something I remember from a cybersecurity training I've done</label>
+            <textarea class="pledge-input" id="sawText" rows="2" placeholder="e.g. don't click links in emails you weren't expecting" oninput="clearErr('pledgeErr')"></textarea>
+          </div>
+          <div class="pledge-field">
+            <label class="pledge-label">The last time something felt off at work was...</label>
+            <textarea class="pledge-input" id="feltText" rows="2" placeholder="e.g. an email that felt urgent but I couldn't place the sender" oninput="clearErr('pledgeErr')"></textarea>
+          </div>
+          <div class="pledge-field">
+            <label class="pledge-label">So, if...</label>
+            <textarea class="pledge-input" id="ifText" rows="2" placeholder="e.g. I receive a request I wasn't expecting" oninput="clearErr('pledgeErr')"></textarea>
+          </div>
+          <div class="pledge-field" style="margin-bottom:0">
+            <label class="pledge-label">...I will</label>
+            <textarea class="pledge-input" id="willText" rows="2" placeholder="e.g. pause and verify before I do anything" oninput="clearErr('pledgeErr')"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="err" id="pledgeErr">Fill in all four prompts to continue.</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="savePledge()">Send pledge</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S3 · PLEDGE SENT
+════════════════════════════════════════════ -->
+<div class="screen" id="s3">
+  <div class="topbar"><span class="topbar-logo">Caught in the Net</span><span class="topbar-step">Pledge sent</span></div>
+  <div class="content" style="align-items:center;text-align:center">
+    <div class="check-icon">✓</div>
+    <div class="eyebrow">Done</div>
+    <h1 style="text-align:center"><strong>Pledge sent.</strong></h1>
+    <div class="btn-row" style="justify-content:center;margin-top:28px">
+      <button class="btn btn-primary" onclick="buildTrigger()">Next morning</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S4 · TRIGGER — SALMON FLASH
+════════════════════════════════════════════ -->
+<div class="screen" id="s-trigger">
+  <div class="topbar">
+    <span class="topbar-logo">Caught in the Net</span>
+    <span class="topbar-step">2. The Trigger</span>
+  </div>
+  <div class="content">
+    <div class="eyebrow">The next morning</div>
+    <h1>Your manager<br><strong>sends this.</strong></h1>
+    <div class="trigger-card">
+      <div class="trigger-from">
+        <div class="trigger-avatar" id="tAvatar">MG</div>
+        <div>
+          <div class="trigger-name" id="tName">Your line manager</div>
+          <div class="trigger-role">This morning · work messaging</div>
+        </div>
+      </div>
+      <div class="manager-note" id="managerNote">"I did the training too. Saw something I wanted to flag for the team."</div>
+      <div class="incident-block">
+        <div class="incident-label">Real incident · <span id="tTeamLabel">your sector</span></div>
+        <div class="incident-text" id="tIncident">Loading…</div>
+      </div>
+      <div class="stat-pill" id="tStat"></div>
+    </div>
+    <p style="font-size:13px;color:rgba(45,59,58,.55);margin-bottom:14px">How does this land?</p>
+    <div class="choices" id="triggerChoices"></div>
+    <div class="err" id="triggerErr" style="color:rgba(45,59,58,.4)">Select one to continue.</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="triggerBtn" onclick="saveTrigger()">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S5 · INBOX (letter waiting)
+════════════════════════════════════════════ -->
+<div class="screen" id="s5">
+  <div class="teams-shell">
+    <div class="teams-sidebar">
+      <div class="teams-icon">☰</div>
+      <div class="teams-icon active">💬</div>
+      <div class="teams-icon">📅</div>
+      <div class="teams-icon">📁</div>
+      <div class="teams-icon avatar" id="s5Avatar">YO</div>
+    </div>
+    <div class="teams-main">
+      <div class="teams-header">
+        <div>
+          <div class="teams-header-title">Inbox</div>
+          <div class="teams-header-sub">1 new message</div>
+        </div>
+      </div>
+      <div class="inbox-list">
+        <div class="inbox-row unread" onclick="openLetter()">
+          <div class="inbox-avatar" style="background:var(--salmon);color:var(--teal)" id="s5InboxAvatar">YO</div>
+          <div class="inbox-info">
+            <div class="inbox-name">A message from your past self</div>
+            <div class="inbox-preview">30 days ago, you wrote this...</div>
+          </div>
+          <div class="inbox-time">Now</div>
+          <div class="unread-dot"></div>
+        </div>
+        <div class="inbox-row">
+          <div class="inbox-avatar" style="background:var(--g700)">SEC</div>
+          <div class="inbox-info">
+            <div class="inbox-name">Security Team</div>
+            <div class="inbox-preview">Monthly security digest: threat landscape update...</div>
+          </div>
+          <div class="inbox-time">3d</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LETTER PANEL
+════════════════════════════════════════════ -->
+<div id="letterPanel" style="display:none" class="email-panel">
+  <div class="email-back" onclick="closeLetter()">← Back to inbox</div>
+  <div class="email-from-row">
+    <div class="email-sender-avatar" id="letterAvatar">YO</div>
+    <div>
+      <div class="email-sender-name">Past You</div>
+      <div class="email-sender-time">Written 30 days ago · arrived now</div>
+    </div>
+  </div>
+  <div class="email-subject">30 days ago, you wrote this.</div>
+  <div class="email-body">
+    <p>You wrote this the day you finished your cybersecurity training. Here it is.</p><br>
+    <div class="commitment-block" id="letterCommitment"></div>
+    <br>
+    <p style="color:var(--fg);font-weight:500">Something feels off? Here's what to do.</p>
+  </div>
+  <div class="action-cards">
+    <div class="action-card">
+      <div class="action-card-num">1</div>
+      <div class="action-card-text">
+        <div class="action-card-title">Pause</div>
+        <div class="action-card-desc">Stop before you click, reply or transfer anything. Urgency is a tactic. The pressure is designed to make you act fast.</div>
+      </div>
+    </div>
+    <div class="action-card">
+      <div class="action-card-num">2</div>
+      <div class="action-card-text">
+        <div class="action-card-title">Verify on a different channel</div>
+        <div class="action-card-desc">Call the person directly. Use a number you already have, not one in the message. Don't reply to the suspicious email.</div>
+      </div>
+    </div>
+    <div class="action-card">
+      <div class="action-card-num">3</div>
+      <div class="action-card-text">
+        <div class="action-card-title">Report it to your security team</div>
+        <div class="action-card-desc">Even if you're not sure. Reporting a near miss is as valuable as catching a real one. It helps protect everyone.</div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:24px">
+    <button class="btn btn-primary" onclick="saveLetter()">See your team</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S6 · LEADERBOARD
+════════════════════════════════════════════ -->
+<div class="screen" id="s6">
+  <div class="topbar"><span class="topbar-logo">Caught in the Net</span><span class="topbar-step">4. The Leaderboard</span></div>
+  <div class="lb-wrap" style="padding-top:32px">
+    <div class="eyebrow">This week · all teams</div>
+    <h1 style="margin-bottom:20px">Phishing emails<br><strong>spotted by team.</strong></h1>
+    <div class="lb-intro">
+      <div class="lb-intro-label">How scoring works</div>
+      <div class="lb-intro-text">Every suspicious email your team reports counts toward your score. <span>The more you spot, the higher your team climbs. Teams at the top earn real recognition.</span></div>
+    </div>
+    <div class="lb-stats" id="lbStats"></div>
+    <div id="lbRows"></div>
+    <div class="reward-banner">
+      <div class="reward-icon">🏆</div>
+      <div class="reward-text"><strong>Top team this month</strong> gets a team lunch, an early Friday, and a shoutout at the all-hands. Second and third place get team points redeemable for perks.<br><span style="color:var(--g500);font-size:12px;display:block;margin-top:4px">This is a prototype. The data shown is fictional and for illustration only.</span></div>
+    </div>
+    <div class="btn-row" style="margin-top:28px">
+      <button class="btn btn-primary" onclick="goTo('s7')">See the full picture</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S7 · END
+════════════════════════════════════════════ -->
+<div class="screen" id="s7">
+  <div class="topbar"><span class="topbar-logo">Caught in the Net</span><span class="topbar-step">That's the system</span></div>
+  <div class="end-shell">
+    <div class="end-star">★</div>
+    <div class="end-title">That's the full system.<br><strong>Four moments. One habit.</strong></div>
+    <div class="tag-row">
+      <span class="tag">Commitment device</span>
+      <span class="tag">Messenger effect</span>
+      <span class="tag">Spaced repetition</span>
+      <span class="tag">Social norms</span>
+    </div>
+    <p class="end-sub">Each step is grounded in behavioural science. Not just reminders. The right nudge at the right moment.</p>
+    <button class="btn btn-primary" onclick="restart()" style="padding:14px 36px;font-size:15px">Start again</button>
+    <div class="end-credit">
+      Caught in the Net · MA Service Design<br>
+      UAL London College of Communication · 2026<br>
+      Rashi Jaiswal
+    </div>
+  </div>
+</div>
+
+<script>
+const TEAMS={
+  finance:{label:"Finance",abbr:"FIN",incident:"An employee at an aerospace company received an email that appeared to be from the CEO, asking them to wire funds urgently for a confidential acquisition. The domain was one character different from the real one. 42 million euros was transferred before anyone noticed.",stat:"Finance teams are targeted in 37% of all business email compromise attacks.",choices:["This kind of request would be hard to spot","We handle payment approvals like this regularly","Good reminder. I'll verify before acting"],managerNote:"\"I did the training too. We handle payment requests every day. Wanted to flag this one for the team.\""},
+  hr:{label:"People and HR",abbr:"HR",incident:"A former employee walked out of a company with a hard drive containing personal data on thousands of current and former employees, including payroll records, home addresses and health information. No technical hack. Just a lapse in access controls.",stat:"HR data appears in over 80% of all ransomware incidents.",choices:["We hold this kind of data every day","Access controls are easy to overlook","Worth reviewing who can access what"],managerNote:"\"I did the training yesterday too. We hold sensitive data for everyone in the organisation. Wanted to flag this.\""},
+  legal:{label:"Legal and Compliance",abbr:"LEGAL",incident:"A legal team failed to properly escalate or disclose a data breach affecting hundreds of millions of accounts. The breach was known internally for months. Regulatory fines, a 350 million dollar drop in acquisition price, and the general counsel resigned.",stat:"Fines for delayed breach disclosure now average 4.4 million dollars.",choices:["Disclosure timelines matter more than I realised","We carry real liability here","Worth knowing our escalation path"],managerNote:"\"I watched the training this week. Given our disclosure responsibilities, this one feels relevant.\""},
+  comms:{label:"Communications",abbr:"COMMS",incident:"A teenager called a company's internal IT support line, pretended to be an employee, and convinced several staff to hand over admin access. High-profile accounts were taken over and used to run a live scam. The entry point was a single phone call.",stat:"Social engineering via phone is the entry point in 41% of corporate account takeovers.",choices:["We manage public-facing accounts too","Fake IT calls are hard to spot","Will be more careful verifying requests by phone"],managerNote:"\"Did the training this morning. We manage official channels. This one is directly relevant to us.\""},
+  marketing:{label:"Marketing",abbr:"MKTG",incident:"Corporate social media accounts were taken over after a marketing team employee approved a fraudulent login request. The takeover was public, immediate, and the reputational damage lasted months.",stat:"Corporate account takeovers increased 60% between 2021 and 2024.",choices:["Our brand accounts are real targets","Push notification approvals need more scrutiny","Worth auditing who has access"],managerNote:"\"I did the training yesterday. We manage accounts that are public-facing. Wanted to flag this for the team.\""},
+  tech:{label:"Technology",abbr:"TECH",incident:"Engineers at a technology company left internal repositories set to public by accident. Source code, private access tokens and credentials for multiple services were exposed to anyone on the internet. No external hack. Just a misconfigured setting.",stat:"Misconfiguration causes 23% of all cloud breaches.",choices:["Config mistakes are easy to make by accident","This happens more than people admit","Worth auditing my own settings"],managerNote:"\"Watched the training this week. Given what we have access to, wanted to share this with the team.\""},
+  it:{label:"IT and Cloud",abbr:"IT",incident:"A senior engineer used their own legitimate admin credentials to steal data from internal cloud systems, then sent a ransom demand to their own employer while helping with the incident response. The breach was valued at tens of millions in impact.",stat:"Cloud insider misuse costs organisations an average of 15 million dollars per incident.",choices:["Legitimate access used maliciously is the hardest to detect","Access review matters more than I thought","Worth checking what I currently hold"],managerNote:"\"Did the training this morning. Our team has broad access. This one felt important to share.\""},
+  data:{label:"Data and AI",abbr:"DATA",incident:"A data team's internal repository was left with public visibility. Access tokens, pipeline credentials and sensitive model data were exposed. A researcher found it before an attacker, but the exposure had been live for weeks.",stat:"Data and AI teams hold some of the most sensitive access in any organisation.",choices:["Data access permissions are easy to get wrong","Our datasets are a significant target","Will review who has access to what"],managerNote:"\"I did the training yesterday. We handle sensitive data and pipelines. Wanted to flag this.\""},
+  software:{label:"Software Development",abbr:"SW",incident:"A developer used privileged access to exfiltrate data, then anonymously attempted to extort their own company while sitting on the incident response team. They were caught when they temporarily disabled their VPN during the theft.",stat:"Privileged access misuse is behind 17% of all malicious insider incidents.",choices:["Admin access is a real responsibility","Insider threats are hardest to spot","Worth knowing what access I actually hold"],managerNote:"\"Watched the training this week. The access our team holds makes this relevant. Wanted to share it.\""},
+  sales:{label:"Sales",abbr:"SALES",incident:"A sales team's CRM was accessed after an employee approved a fraudulent multi-factor authentication request. Up to 6 million customer records were scraped. The entry point was a single tap on a push notification.",stat:"CRM systems are targeted in 34% of sales team data breaches.",choices:["Our CRM holds sensitive client data","Approving access requests needs more thought","Will pause before approving notifications"],managerNote:"\"I did the training this morning. We live in the CRM. This one is directly relevant.\""},
+  ops:{label:"Operations",abbr:"OPS",incident:"Attackers entered a retail company's network through a phishing email sent to an HVAC contractor who had remote access to billing systems. 40 million customer credit card records were stolen. The entry point was a third-party vendor.",stat:"Third-party vendor access is involved in 29% of major data breaches.",choices:["We manage vendor relationships and access every day","Third-party risk is easy to overlook","Worth reviewing what access our suppliers have"],managerNote:"\"Watched the training this week. We manage a lot of external relationships. Wanted to flag this.\""},
+  strategy:{label:"Strategy",abbr:"STRAT",incident:"A social engineering attack via a messaging app gave an attacker access to strategy documents, acquisition plans and executive communications at a major tech company. The attacker was 18 years old. The entry point was a single contractor credential.",stat:"Corporate espionage targeting strategy data increased 58% between 2020 and 2024.",choices:["Strategy data is high value to competitors","Social engineering is the easiest route in","Will be more careful about what I share"],managerNote:"\"Did the training yesterday. Our team handles sensitive information that moves fast. Wanted to share this.\""},
+  cx:{label:"Customer Experience",abbr:"CX",incident:"Employees received SMS messages impersonating the IT department. Several clicked the link and entered credentials. Attackers used those credentials to access internal systems and export customer data for hundreds of organisations.",stat:"Social engineering via SMS is now more common than email phishing in B2B environments.",choices:["Customer data is our biggest responsibility","Fake IT messages are very convincing","Will pause before clicking any credential link"],managerNote:"\"Watched the training this morning. We hold a lot of customer trust. Wanted to flag this for the team.\""},
+  other:{label:"Other",abbr:"TEAM",incident:"In a well-documented case, a routine software update was compromised before it reached users. 18,000 organisations, including government agencies, installed a backdoor. The attack went undetected for nine months. It entered through a trusted, approved process.",stat:"Supply chain software attacks increased 650% between 2020 and 2022.",choices:["Trusted processes can be compromised too","Nine months undetected is a long time","Worth being aware of what I approve"],managerNote:"\"I did the training this week. Wanted to share something that stuck with me. Feels relevant regardless of team.\""},
+};
+
+const TEAMS_LB=[
+  {abbr:"ENG",name:"Engineering"},{abbr:"HR",name:"People and HR"},{abbr:"IT",name:"IT and Cloud"},
+  {abbr:"SALES",name:"Sales"},{abbr:"MKTG",name:"Marketing"},{abbr:"LEGAL",name:"Legal"},
+  {abbr:"OPS",name:"Operations"},{abbr:"FIN",name:"Finance"},{abbr:"COMMS",name:"Comms"},
+  {abbr:"DATA",name:"Data and AI"},{abbr:"SW",name:"Software"},{abbr:"CX",name:"Customer XP"},
+];
+
+let state={team:null,sawText:"",feltText:"",ifText:"",willText:"",triggerChoice:null};
+
+function prog(p){document.getElementById("pf").style.width=p+"%"}
+function goTo(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+  const map={s0:0,s1:12,s2:25,s3:38,"s-trigger":52,s5:65,s6:80,s7:100};
+  prog(map[id]||0);
+}
+function clearErr(id){const e=document.getElementById(id);if(e)e.classList.remove("show")}
+
+function onTeamSelect(){
+  const v=document.getElementById("teamSelect").value;
+  state.team=v||null;
+  document.getElementById("pledgeWrap").style.display=v?"block":"none";
+}
+
+function savePledge(){
+  const s=document.getElementById("sawText").value.trim();
+  const f=document.getElementById("feltText").value.trim();
+  const i=document.getElementById("ifText").value.trim();
+  const w=document.getElementById("willText").value.trim();
+  if(!s||!f||!i||!w){document.getElementById("pledgeErr").classList.add("show");return}
+  state.sawText=s;state.feltText=f;state.ifText=i;state.willText=w;
+  goTo("s3");
+}
+
+function buildTrigger(){
+  const d=TEAMS[state.team]||TEAMS.other;
+  document.getElementById("tAvatar").textContent="MG";
+  document.getElementById("tName").textContent="Your line manager";
+  document.getElementById("tTeamLabel").textContent=d.label;
+  document.getElementById("tIncident").textContent=d.incident;
+  document.getElementById("tStat").textContent=d.stat;
+  document.getElementById("managerNote").textContent=d.managerNote;
+  const tc=document.getElementById("triggerChoices");
+  tc.innerHTML=d.choices.map((c,i)=>`<button class="choice" onclick="selectChoice(this,'c${i}')"><div class="choice-dot"></div>${c}</button>`).join("");
+  goTo("s-trigger");
+}
+
+function selectChoice(btn,val){
+  btn.closest(".choices").querySelectorAll(".choice").forEach(b=>b.classList.remove("sel"));
+  btn.classList.add("sel");state.triggerChoice=val;
+  document.getElementById("triggerErr").classList.remove("show");
+}
+
+function saveTrigger(){
+  if(!state.triggerChoice){document.getElementById("triggerErr").classList.add("show");return}
+  const init=(state.team||"YO").substring(0,2).toUpperCase();
+  document.getElementById("s5Avatar").textContent=init;
+  document.getElementById("s5InboxAvatar").textContent=init;
+  document.getElementById("letterAvatar").textContent=init;
+  goTo("s5");
+}
+
+function openLetter(){
+  const pledge=`Something I remember from training:\n"${state.sawText}"\n\nThe last time something felt off:\n"${state.feltText}"\n\nSo, if ${state.ifText},\nI will ${state.willText}.`;
+  document.getElementById("letterCommitment").textContent=pledge;
+  document.getElementById("letterPanel").style.display="flex";
+}
+function closeLetter(){document.getElementById("letterPanel").style.display="none"}
+
+function saveLetter(){
+  closeLetter();buildLeaderboard();
+}
+
+function buildLeaderboard(){
+  const d=TEAMS[state.team]||TEAMS.other;
+  const yourAbbr=d.abbr;
+  const yourScore=Math.floor(Math.random()*5)+8;
+  const others=TEAMS_LB.filter(t=>t.abbr!==yourAbbr).sort(()=>Math.random()-.5).slice(0,7);
+  const all=[{abbr:yourAbbr,name:d.label,score:yourScore,you:true},...others.map(t=>({abbr:t.abbr,name:t.name,score:Math.floor(Math.random()*10)+3,you:false}))];
+  all.sort((a,b)=>b.score-a.score);
+  const top=all[0].score;
+  const total=all.reduce((a,b)=>a+b.score,0);
+  const rank=all.findIndex(t=>t.you)+1;
+  document.getElementById("lbStats").innerHTML=`
+    <div class="lb-stat"><div class="lb-stat-num" style="color:var(--salmon)">${total}</div><div class="lb-stat-lbl">Flags spotted</div></div>
+    <div class="lb-stat"><div class="lb-stat-num" style="color:var(--green)">${all.length}</div><div class="lb-stat-lbl">Teams active</div></div>
+    <div class="lb-stat"><div class="lb-stat-num">#${rank}</div><div class="lb-stat-lbl">${yourAbbr} rank</div></div>`;
+  const rankClass=i=>i===0?"gold":i===1?"silver":i===2?"bronze":"";
+  document.getElementById("lbRows").innerHTML=all.map((t,i)=>`
+    <div class="lb-team-row ${t.you?"you":""}">
+      <div class="lb-rank ${rankClass(i)}">${i+1}</div>
+      <div class="lb-team-icon">${t.abbr}</div>
+      <div class="lb-team-info">
+        <div class="lb-team-name">${t.name}${t.you?`<span class="your-tag">you</span>`:""}</div>
+        <div class="lb-team-sub">${t.score} phishing emails spotted</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="lb-score">${t.score}</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${Math.round(t.score/top*100)}%"></div></div>
+      </div>
+    </div>`).join("");
+  goTo("s6");
+}
+
+function restart(){
+  state={team:null,sawText:"",feltText:"",ifText:"",willText:"",triggerChoice:null};
+  document.getElementById("teamSelect").value="";
+  ["sawText","feltText","ifText","willText"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("pledgeWrap").style.display="none";
+  document.getElementById("letterPanel").style.display="none";
+  prog(0);goTo("s0");window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
